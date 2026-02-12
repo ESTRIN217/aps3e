@@ -42,7 +42,7 @@
     <string name="emulator_settings_core_thread_affinity_mask">Máscara de Afinidade de Threads</string>
     <string name="create_shortcut">Criar Atalho</string>
     <string name="loading">Carregando...</string>
-    <string name="resolution_not_support">Resolução ou proporção de aspecto não suportada\nO jogo atual só suporta:\n%s\n\nPor favor, modifique com as seguinte configurações:\n%s\n%s\n</string>
+    <string name="resolution_not_support" formatted="false">Resolução ou proporção de aspecto não suportada\nO jogo atual só suporta:\n%s\n\nPor favor, modifique com as seguinte configurações:\n%s\n%s\n</string>
     <string name="show_game_info">Mostrar Informações do Jogo</string>
     <string name="quick_start_page">Página Inicial Rápida</string>
     <string name="prev_step">Passo Anterior</string>
@@ -998,4 +998,5 @@
 	<string name="SAVESTATE_FAILED_DUE_TO_SPU">Estado de salvamento falhou: Não foi possível bloquear o estado SPU, usar SPU ASMJIT pode corrigir.</string>
 	<string name="PROGRESS_DIALOG_PRELOADING_SHADER_CACHE">Pré-carregando shaders do disco...</string>
 
+    <string name="force_cover_art_search">Forcar pesquisa de arte de capa</string>
 </resources>

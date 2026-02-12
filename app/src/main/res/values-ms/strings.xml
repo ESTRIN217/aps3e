@@ -42,7 +42,7 @@
 	<string name="emulator_settings_core_thread_affinity_mask">Topeng Keterikatan Benang</string>
 	<string name="create_shortcut">Buat Pintasan</string>
 	<string name="loading">Memuatkan...</string>
-	<string name="resolution_not_support">Resolusi atau nisbah lebar tidak disokong\nPermainan semasa hanya menyokong:\n%s\n\nSila ubah dengan tetapan berikut:\n%s\n%s\n</string>
+	<string name="resolution_not_support" formatted="false">Resolusi atau nisbah lebar tidak disokong\nPermainan semasa hanya menyokong:\n%s\n\nSila ubah dengan tetapan berikut:\n%s\n%s\n</string>
 	<string name="show_game_info">Tunjukkan Maklumat Permainan</string>
 	<string name="quick_start_page">Halaman Mula Pantas</string>
 	<string name="prev_step">Langkah Sebelumnya</string>
@@ -1034,4 +1034,5 @@ Diterjemahkan oleh qwen3
 	<string name="SAVESTATE_FAILED_DUE_TO_SPU">Gagal menyimpan keadaan: Gagal mengunci keadaan SPU, menggunakan SPU ASMJIT akan memperbaikinya.</string>
 	<string name="PROGRESS_DIALOG_PRELOADING_SHADER_CACHE">Menyediakan semula shader dari cakera...</string>
 
+	<string name="force_cover_art_search">Paksa carian cover art</string>
 </resources>

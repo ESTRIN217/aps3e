@@ -41,7 +41,7 @@
 	<string name="emulator_settings_core_thread_affinity_mask">Маска привязки потоков</string>
 	<string name="create_shortcut">Создать ярлык</string>
 	<string name="loading">Загрузка...</string>
-	<string name="resolution_not_support">Разрешение или соотношение сторон не поддерживается\nТекущая игра поддерживает:\n%s\n\nИзмените настройки:\n%s\n%s\n</string>
+	<string name="resolution_not_support" formatted="false">Разрешение или соотношение сторон не поддерживается\nТекущая игра поддерживает:\n%s\n\nИзмените настройки:\n%s\n%s\n</string>
 	<string name="show_game_info">Показать информацию об игре</string>
 	<string name="quick_start_page">Быстрый старт</string>
 	<string name="prev_step">Предыдущий шаг</string>
@@ -1024,4 +1024,5 @@
 	<string name="SAVESTATE_FAILED_DUE_TO_SPU">Сохранение невозможно: не удалось заблокировать SPU, используйте SPU ASMJIT</string>
 	<string name="PROGRESS_DIALOG_PRELOADING_SHADER_CACHE">Предзагрузка шейдеров с диска...</string>
 
+	<string name="force_cover_art_search">Принудительный поиск обложки</string>
 </resources>

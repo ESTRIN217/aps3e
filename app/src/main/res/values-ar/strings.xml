@@ -44,7 +44,7 @@
     <string name="emulator_settings_core_thread_affinity_mask">قناع الانتساب للخيوط</string>
     <string name="create_shortcut">إنشاء اختصار</string>
     <string name="loading">جارٍ التحميل...</string>
-    <string name="resolution_not_support">الدقة أو نسبة العرض غير مدعومة\nاللعبة الحالية تدعم فقط:\n%s\n\nيرجى التعديل باستخدام الإعدادات التالية:\n%s\n%s\n</string>
+	<string name="resolution_not_support" formatted="false">الدقة أو نسبة العرض غير مدعومة\nاللعبة الحالية تدعم فقط:\n%s\n\nيرجى التعديل باستخدام الإعدادات التالية:\n%s\n%s\n</string>
     <string name="show_game_info">عرض معلومات اللعبة</string>
     <string name="quick_start_page">الصفحة البدء السريع</string>
     <string name="prev_step">الخطوة السابقة</string>
@@ -1029,4 +1029,5 @@
 
 
 
+	<string name="force_cover_art_search">فرض البحث عن غلاف اللعبة</string>
 </resources>

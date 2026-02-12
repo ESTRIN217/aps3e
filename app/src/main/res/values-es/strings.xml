@@ -42,7 +42,7 @@
     <string name="emulator_settings_core_thread_affinity_mask">Máscara de afinidad de hilos</string>
     <string name="create_shortcut">Crear Acceso Directo</string>
     <string name="loading">Cargando...</string>
-    <string name="resolution_not_support">La resolución o relación de aspecto no es compatible\nEl juego actual solo admite:\n%s\n\nPor favor modifique con la siguientes configuraciones:\n%s\n%s\n</string>
+    <string name="resolution_not_support" formatted="false">La resolución o relación de aspecto no es compatible\nEl juego actual solo admite:\n%s\n\nPor favor modifique con la siguientes configuraciones:\n%s\n%s\n</string>
     <string name="show_game_info">Mostrar Información del Juego</string>
     <string name="quick_start_page">Página de Inicio Rápido</string>
     <string name="prev_step">Paso Anterior</string>
@@ -1031,4 +1031,5 @@ Traducción qwen3
 	<string name="SAVESTATE_FAILED_DUE_TO_SPU">Error de estado guardado: No se pudo bloquear el estado SPU, usar SPU ASMJIT lo solucionará.</string>
 	<string name="PROGRESS_DIALOG_PRELOADING_SHADER_CACHE">Precargando shaders desde disco...</string>
 
+    <string name="force_cover_art_search">Forzar busqueda de portada</string>
 </resources>

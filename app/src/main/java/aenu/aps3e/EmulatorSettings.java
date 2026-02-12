@@ -30,7 +30,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.compose.runtime.Composer;
+import androidx.compose.ui.platform.ComposeView;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import androidx.preference.Preference;
 import androidx.preference.PreferenceDataStore;
@@ -56,6 +60,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function2;
 
 public class EmulatorSettings extends AppCompatActivity {
 
@@ -87,6 +94,13 @@ public class EmulatorSettings extends AppCompatActivity {
     static final String Core$Thread_Affinity_Mask="Core|Thread Affinity Mask";
     //"Core|Thread Scheduler Mode"
     static final String Core$Thread_Scheduler_Mode="Core|Thread Scheduler Mode";
+
+    Emulator.Config config;
+    Emulator.Config original_config;
+    String config_path;
+    boolean is_global;
+    private final MutableLiveData<Integer> refresh_tick = new MutableLiveData<>(0);
+
     @FunctionalInterface
     public static interface InstallCallback {
         void onInstallComplete(String path);
@@ -1012,22 +1026,303 @@ public class EmulatorSettings extends AppCompatActivity {
         }
     }
 
-    SettingsFragment fragment;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        String config_path=getIntent().getStringExtra(EXTRA_CONFIG_PATH);
-
-
+        config_path=getIntent().getStringExtra(EXTRA_CONFIG_PATH);
         if(config_path!=null) {
-            fragment=new SettingsFragment(config_path,false);
+            is_global=false;
         }
         else{
-            fragment=new SettingsFragment(Application.get_global_config_file().getAbsolutePath(),true);
+            is_global=true;
+            config_path=Application.get_global_config_file().getAbsolutePath();
         }
 
-        getSupportFragmentManager().beginTransaction().replace(android.R.id.content,fragment).commit();
+        setContentView(R.layout.activity_emulator_settings);
+
+        if(new File(config_path).exists()){
+            try{
+                config=Emulator.Config.open_config_file(config_path);
+                original_config=Emulator.Config.open_config_from_string(QuickStartActivity.load_default_config_str(this));
+            }catch(Exception e){
+                Log.e("EmulatorSettings",e.toString());
+            }
+        }
+
+        ComposeView compose_view=findViewById(R.id.compose_view);
+        compose_view.setContent(new Function2<Composer, Integer, Unit>() {
+            @Override
+            public Unit invoke(Composer composer, Integer changed) {
+                SettingsScreenKt.EmulatorSettingsScreen(EmulatorSettings.this, config, original_config, refresh_tick, is_global, config_path, composer, 0);
+                return Unit.INSTANCE;
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        if(config!=null){
+            config.close_config_file();
+            config=null;
+        }
+        if(original_config!=null){
+            original_config.close_config();
+            original_config=null;
+        }
+        super.onDestroy();
+    }
+
+    public LiveData<Integer> getRefreshTick(){
+        return refresh_tick;
+    }
+
+    void bumpRefresh(){
+        Integer current=refresh_tick.getValue();
+        if(current==null) current=0;
+        refresh_tick.setValue(current+1);
+    }
+
+    void applyCustomDriverPath(String new_path){
+        if(config==null) return;
+        config.save_config_entry(Video$Vulkan$Custom_Driver_Library_Path,new_path);
+        bumpRefresh();
+    }
+
+    void applyCustomFontPath(String new_path){
+        if(config==null) return;
+        config.save_config_entry(Miscellaneous$Custom_Font_File_Path,new_path);
+        bumpRefresh();
+    }
+
+    void requestSelectCustomDriverFile(){
+        Intent intent=new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(intent, REQUEST_CODE_SELECT_CUSTOM_DRIVER);
+    }
+
+    void requestSelectFontFile(){
+        Intent intent=new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(intent, REQUEST_CODE_SELECT_CUSTOM_FONT);
+    }
+
+    void create_list_dialog(String title, String[] items, DialogInterface.OnClickListener listener){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title)
+                .setItems(items, listener)
+                .setNegativeButton(android.R.string.cancel, null);
+        builder.create().show();
+    }
+
+    void showSelectLlvmCpuList(){
+        if(config==null) return;
+        String[] items=Emulator.get.get_support_llvm_cpu_list();
+        create_list_dialog(getString(R.string.emulator_settings_core_use_llvm_cpu)
+                , items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        config.save_config_entry(Core$Use_LLVM_CPU,items[which]);
+                        bumpRefresh();
+                    }
+                });
+    }
+
+    void showSelectVulkanAdapterList(){
+        if(config==null) return;
+        String[] items=Emulator.get.get_vulkan_physical_dev_list();
+        create_list_dialog(getString(R.string.emulator_settings_video_vulkan_adapter)
+                , items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        config.save_config_entry("Video|Vulkan|Adapter",items[which]);
+                        bumpRefresh();
+                    }
+                }
+        );
+    }
+
+    void showSelectCustomDriverList(){
+        if(config==null) return;
+        File[] files=Application.get_custom_driver_dir().listFiles();
+        if(files==null||files.length==0){
+            create_list_dialog(getString(R.string.emulator_settings_video_vulkan_custom_driver_library_path_dialog_title)
+                    , new String[]{getString(R.string.emulator_settings_video_vulkan_custom_driver_library_path_dialog_add_hint)}, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            requestSelectCustomDriverFile();
+                        }
+                    });
+            return;
+        }
+
+        String  items[]=new String[files.length+1];
+        for(int i=0;i<files.length;i++){
+            if(files[i].isFile())
+                items[i]=files[i].getName();
+            else{
+                File[] sub_files=files[i].listFiles();
+                if(sub_files.length==1)
+                    items[i]=files[i].getName()+"/"+sub_files[0].getName();
+                else{
+                    File json_f=new File(files[i], "meta.json");
+                    if(json_f.exists()){
+                        try {
+                            JSONObject json = new JSONObject(Utils.read_file_as_str(json_f));
+                            items[i]=files[i].getName()+"/"+json.getString("libraryName");
+                        } catch (Exception e) {
+                            items[i]="";
+                        }
+                    }
+                    else
+                        items[i]="";
+                }
+            }
+        }
+        items[files.length]=getString(R.string.emulator_settings_video_vulkan_custom_driver_library_path_dialog_add_hint);
+        create_list_dialog(getString(R.string.emulator_settings_video_vulkan_custom_driver_library_path_dialog_title), items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                if(which==files.length){
+                    requestSelectCustomDriverFile();
+                }else{
+                    File f=new File(files[which].getParentFile(),items[which]);
+                    applyCustomDriverPath(f.getAbsolutePath());
+                }
+            }
+        });
+    }
+
+    void showSelectFontFileList(){
+        if(config==null) return;
+        File[] files=Application.get_custom_font_dir().listFiles();
+        if(files==null||files.length==0){
+            create_list_dialog(getString(R.string.emulator_settings_miscellaneous_custom_font_file_path_dialog_title)
+                    , new String[]{getString(R.string.emulator_settings_miscellaneous_custom_font_file_path_dialog_add_hint)}, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            requestSelectFontFile();
+                        }
+                    });
+            return;
+        }
+
+        String  items[]=new String[files.length+1];
+        for(int i=0;i<files.length;i++){
+            items[i]=files[i].getName();
+        }
+        items[files.length]=getString(R.string.emulator_settings_miscellaneous_custom_font_file_path_dialog_add_hint);
+        create_list_dialog(getString(R.string.emulator_settings_miscellaneous_custom_font_file_path_dialog_title), items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                if(which==files.length)
+                    requestSelectFontFile();
+                else
+                    applyCustomFontPath(files[which].getAbsolutePath());
+            }
+        });
+    }
+
+    void showAffinityMaskView(){
+        if(config==null) return;
+        final View layout=LayoutInflater.from(this).inflate(R.layout.setting_affinity_mask,null);
+        load_affinity_mask(layout,config);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(layout);
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                save_affinity_mask(layout,config);
+                bumpRefresh();
+            }
+        });
+        builder.setCancelable( false);
+        builder.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                if(keyCode==KeyEvent.KEYCODE_BACK)
+                    return true;
+                return false;
+            }
+        });
+        builder.create().show();
+    }
+
+    void showLibraryControlView(){
+        if(config==null) return;
+        LibraryControlAdapter adapter=new LibraryControlAdapter(this);
+        adapter.set_modify_libs(config.load_config_entry_ty_arr("Core|Libraries Control"));
+        ListView view = new ListView(this);
+        view.setAdapter(adapter);
+        view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                LibraryControlAdapter  adapter= (LibraryControlAdapter) parent.getAdapter();
+                int new_lib_type=adapter.get_lib_type(position)^1;
+                adapter.set_lib_trpe(position,new_lib_type);
+                config.save_config_entry_ty_arr("Core|Libraries Control",adapter.get_modify_libs());
+                bumpRefresh();
+            }
+        });
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.emulator_settings_core_libraries_control)
+                .setView(view)
+                .setNegativeButton(android.R.string.cancel, null);
+        builder.create().show();
+    }
+
+    void resetAsDefaultConfig(){
+        if(config_path==null) return;
+        new AlertDialog.Builder(this)
+                .setMessage(getString(R.string.reset_as_default)+"?")
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(config!=null) {
+                            config.close_config_file();
+                            config=null;
+                        }
+                        if(original_config!=null){
+                            original_config.close_config();
+                            original_config=null;
+                        }
+                        Utils.copy_file(Application.get_default_config_file(),new File(config_path));
+                        finish();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .create().show();
+    }
+
+    void useGlobalConfig(){
+        if(config_path==null) return;
+        new AlertDialog.Builder(this)
+                .setMessage(getString(R.string.use_global_config)+"?")
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(config!=null) {
+                            config.close_config_file();
+                            config=null;
+                        }
+                        if(original_config!=null){
+                            original_config.close_config();
+                            original_config=null;
+                        }
+                        new File(config_path).delete();
+                        finish();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .create().show();
     }
 
     static boolean install_custom_driver_from_zip(Context ctx, Uri uri, InstallCallback cb) {
@@ -1161,13 +1456,13 @@ public class EmulatorSettings extends AppCompatActivity {
         switch (requestCode){
             case REQUEST_CODE_SELECT_CUSTOM_DRIVER:
                 if(file_name.endsWith(".zip"))
-                    install_custom_driver_from_zip(this,uri,(path)->{ fragment.setup_costom_driver_library_path(path);});
+                    install_custom_driver_from_zip(this,uri,(path)->{ applyCustomDriverPath(path);});
                 else if(file_name.endsWith(".so"))
-                    install_custom_driver_from_lib(this,uri,(path)->{ fragment.setup_costom_driver_library_path(path);});
+                    install_custom_driver_from_lib(this,uri,(path)->{ applyCustomDriverPath(path);});
                 break;
                 case REQUEST_CODE_SELECT_CUSTOM_FONT:
                     if(file_name.endsWith(".ttf")||file_name.endsWith(".ttc")||file_name.endsWith(".otf"))
-                        install_custom_font(this,uri,(path)->{ fragment.setup_costom_font_path(path);});
+                        install_custom_font(this,uri,(path)->{ applyCustomFontPath(path);});
                     break;
         }
     }

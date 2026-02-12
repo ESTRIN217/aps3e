@@ -59,7 +59,7 @@
 	<string name="emulator_settings_core_thread_affinity_mask">Masque d‘affinité des threads</string>
 	<string name="create_shortcut">Créer un raccourci</string>
 	<string name="loading">Chargement...</string>
-	<string name="resolution_not_support">Résolution ou ratio d’affichage non supporté\nLe jeu actuel ne supporte que:\n%s\n\nVeuillez modifier avec les paramètres suivants:\n%s\n%s\n</string>
+	<string name="resolution_not_support" formatted="false">Résolution ou ratio d’affichage non supporté\nLe jeu actuel ne supporte que:\n%s\n\nVeuillez modifier avec les paramètres suivants:\n%s\n%s\n</string>
 	<string name="show_game_info">Afficher les informations du jeu</string>
 	<string name="quick_start_page">Page de démarrage rapide</string>
 	<string name="prev_step">Étape précédente</string>
@@ -1043,4 +1043,5 @@ Traduction qwen3
 	<string name="SAVESTATE_FAILED_DUE_TO_SPU">Sauvegarde échouée : Échec de verrouillage SPU, utiliser SPU ASMJIT résoudra le problème.</string>
 	<string name="PROGRESS_DIALOG_PRELOADING_SHADER_CACHE">Préchargement des shaders depuis le disque...</string>
 
+	<string name="force_cover_art_search">Forcer la recherche de jaquette</string>
 </resources>

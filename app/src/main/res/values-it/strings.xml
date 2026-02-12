@@ -49,7 +49,7 @@
     <string name="emulator_settings_core_thread_affinity_mask">Maschera di Affinità dei Thread</string>
     <string name="create_shortcut">Crea Scorciatoia</string>
     <string name="loading">Caricamento...</string>
-    <string name="resolution_not_support">Risoluzione o rapporto d’aspetto non supportato\nIl gioco attuale supporta solo:\n%s\n\nModificare con le seguenti impostazioni:\n%s\n%s\n</string>
+    <string name="resolution_not_support" formatted="false">Risoluzione o rapporto d’aspetto non supportato\nIl gioco attuale supporta solo:\n%s\n\nModificare con le seguenti impostazioni:\n%s\n%s\n</string>
     <string name="show_game_info">Mostra Informazioni Gioco</string>
     <string name="quick_start_page">Pagina di Avvio Rapido</string>
     <string name="prev_step">Passo Precedente</string>
@@ -113,6 +113,8 @@
     <string name="open_file_manager">Apri Gestore File</string>
     <string name="installing_firmware">Installazione Firmware...</string>
     <string name="refresh_list">Aggiorna Lista</string>
+    <string name="resume_from">Riprendi da</string>
+    <string name="search_games">Cerca giochi</string>
     <string name="select_game">Seleziona Gioco</string>
     <string name="install_firmware">Installa Firmware</string>
     <string name="install_game">Installa EDAT/RAP/PKG</string>
@@ -1039,4 +1041,5 @@
 	<string name="SAVESTATE_FAILED_DUE_TO_SPU">Salvataggio fallito: Impossibile bloccare lo stato SPU, utilizzare SPU ASMJIT risolverà il problema.</string>
 	<string name="PROGRESS_DIALOG_PRELOADING_SHADER_CACHE">Pre-caricamento shader dalla cache su disco...</string>
 
+    <string name="force_cover_art_search">Forza Ricerca Cover Art</string>
 </resources>

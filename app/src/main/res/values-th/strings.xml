@@ -42,7 +42,7 @@
 	<string name="emulator_settings_core_thread_affinity_mask">มาสก์ความสัมพันธ์ของเธรด</string>
 	<string name="create_shortcut">สร้างทางลัด</string>
 	<string name="loading">กำลังโหลด...</string>
-	<string name="resolution_not_support">ไม่รองรับความละเอียดหรืออัตราส่วนภาพนี้\nเกมนี้รองรับเฉพาะ:\n%s\n\nโปรดปรับเปลี่ยนการตั้งค่าตามนี้:\n%s\n%s\n</string>
+	<string name="resolution_not_support" formatted="false">ไม่รองรับความละเอียดหรืออัตราส่วนภาพนี้\nเกมนี้รองรับเฉพาะ:\n%s\n\nโปรดปรับเปลี่ยนการตั้งค่าตามนี้:\n%s\n%s\n</string>
 	<string name="show_game_info">แสดงข้อมูลเกม</string>
 	<string name="quick_start_page">หน้าเริ่มต้นด่วน</string>
 	<string name="prev_step">ขั้นตอนก่อนหน้า</string>
@@ -1029,4 +1029,5 @@
 	<string name="SAVESTATE_FAILED_DUE_TO_SPU">บันทึกสถานะล้มเหลว: ล็อกสถานะ SPU ล้มเหลว การใช้งาน SPU ASMJIT จะแก้ไขปัญหา</string>
 	<string name="PROGRESS_DIALOG_PRELOADING_SHADER_CACHE">กำลังโหลดชเดอร์แคชจากดิสก์...</string>
 
+	<string name="force_cover_art_search">บังคับค้นหาปก</string>
 </resources>

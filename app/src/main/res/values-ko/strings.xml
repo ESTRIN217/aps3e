@@ -42,7 +42,7 @@
 	<string name="emulator_settings_core_thread_affinity_mask">쓰레드 친화성 마스크</string>
 	<string name="create_shortcut">바로 가기 만들기</string>
 	<string name="loading">로딩...</string>
-<string name="resolution_not_support">해상도 또는 화면 비율이 지원되지 않음\n현재 게임에서 지원하는 항목:\n%s\n\n다음 설정을 통해 수정하십시오:\n%s\n%s\n</string>
+<string name="resolution_not_support" formatted="false">해상도 또는 화면 비율이 지원되지 않음\n현재 게임에서 지원하는 항목:\n%s\n\n다음 설정을 통해 수정하십시오:\n%s\n%s\n</string>
 <string name="show_game_info">게임 정보 표시</string>
 <string name="quick_start_page">빠른 시작 페이지</string>
 <string name="prev_step">이전 단계</string>
@@ -1034,4 +1034,5 @@ RPCS3 포팅 최적화 기반 제작되었습니다. RPCS3 프로젝트 참여�
 <string name="SAVESTATE_FAILED_DUE_TO_SPU">세이브 실패: SPU 상태 잠금 실패. SPU ASMJIT 사용 시 해결</string>
 <string name="PROGRESS_DIALOG_PRELOADING_SHADER_CACHE">디스크에서 셰이더 캐시 사전 로딩 중...</string>
 
+	<string name="force_cover_art_search">커버 아트 검색 강제</string>
 </resources>

@@ -42,7 +42,7 @@
     <string name="emulator_settings_core_thread_affinity_mask">Thread-Affinitätsmaske</string>
     <string name="create_shortcut">Verknüpfung erstellen</string>
     <string name="loading">Wird geladen...</string>
-    <string name="resolution_not_support">Auflösung oder Seitenverhältnis wird nicht unterstützt\nDas aktuelle Spiel unterstützt nur:\n%s\n\nBitte ändern Sie die Einstellungen:\n%s\n%s\n</string>
+    <string name="resolution_not_support" formatted="false">Auflösung oder Seitenverhältnis wird nicht unterstützt\nDas aktuelle Spiel unterstützt nur:\n%s\n\nBitte ändern Sie die Einstellungen:\n%s\n%s\n</string>
     <string name="show_game_info">Spielinformationen anzeigen</string>
     <string name="quick_start_page">Schnellstartseite</string>
     <string name="prev_step">Vorheriger Schritt</string>
@@ -1022,5 +1022,5 @@
 	<string name="SAVESTATE_FAILED_DUE_TO_MISSING_SPU_SETTING">Spielstand fehlgeschlagen: SPU-Zustandssperre fehlgeschlagen, Aktivierung des SPU-Kompatibilitätsmodus könnte helfen.</string>
 	<string name="SAVESTATE_FAILED_DUE_TO_SPU">Spielstand fehlgeschlagen: SPU-Zustandssperre fehlgeschlagen, Nutzung von SPU ASMJIT wird helfen.</string>
 	<string name="PROGRESS_DIALOG_PRELOADING_SHADER_CACHE">Zwischengespeicherte Shaders werden vorgeladen...</string>
-/
+    <string name="force_cover_art_search">Cover-Art-Suche erzwingen</string>
 </resources>

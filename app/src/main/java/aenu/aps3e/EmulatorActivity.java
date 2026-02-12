@@ -38,6 +38,11 @@ public class EmulatorActivity extends Activity implements View.OnGenericMotionLi
 	public static final String EXTRA_ISO_URI="iso_uri";
 	public static final String EXTRA_GAME_DIR="game_dir";
 
+	private static final String PREF_LAST_SESSION_ACTIVE = "last_session_active";
+	private static final String PREF_LAST_SESSION_END = "last_session_end_time";
+	private static final String PREF_LAST_SESSION_START = "last_session_start_time";
+	private static final String PREF_LAST_GAME_SERIAL = "last_game_serial";
+
     static final int DELAY_ON_CREATE=0xaeae0001;
     private SparseIntArray keysMap = new SparseIntArray();
     private GameFrameView gv;
@@ -652,6 +657,22 @@ public class EmulatorActivity extends Activity implements View.OnGenericMotionLi
 	protected void onDestroy()
 	{
 		super.onDestroy();
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		String serial = prefs.getString(PREF_LAST_GAME_SERIAL, null);
+		long startTime = prefs.getLong(PREF_LAST_SESSION_START, 0L);
+		long now = System.currentTimeMillis();
+		if (serial != null && startTime > 0L && now >= startTime) {
+			String playtimeKey = "playtime_ms_" + serial;
+			long previous = prefs.getLong(playtimeKey, 0L);
+			long delta = now - startTime;
+			prefs.edit()
+					.putLong(playtimeKey, previous + delta)
+					.apply();
+		}
+		prefs.edit()
+				.putBoolean(PREF_LAST_SESSION_ACTIVE, false)
+				.putLong(PREF_LAST_SESSION_END, now)
+				.apply();
 		System.exit(0);
 	}
 

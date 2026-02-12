@@ -42,7 +42,7 @@
 	<string name="emulator_settings_core_thread_affinity_mask">थ्रेड सम्बद्धता मास्क</string>
 	<string name="create_shortcut">शॉर्टकट बनाएं</string>
 	<string name="loading">लोड हो रहा है...</string>
-	<string name="resolution_not_support">संकल्प या आकार अनुपात समर्थित नहीं है\nवर्तमान गेम केवल निम्नलिखित समर्थित है:\n%s\n\nकृपया निम्न सेटिंग्स के साथ संशोधित करें:\n%s\n%s\n</string>
+	<string name="resolution_not_support" formatted="false">संकल्प या आकार अनुपात समर्थित नहीं है\nवर्तमान गेम केवल निम्नलिखित समर्थित है:\n%s\n\nकृपया निम्न सेटिंग्स के साथ संशोधित करें:\n%s\n%s\n</string>
 	<string name="show_game_info">गेम जानकारी दिखाएं</string>
 	<string name="quick_start_page">त्वरित प्रारंभ पृष्ठ</string>
 	<string name="prev_step">पिछला चरण</string>
@@ -1028,4 +1028,5 @@ Qwen3 का अनुवाद
     <string name="SAVESTATE_FAILED_DUE_TO_SPU">सेवस्टेट विफल: एसपीयू स्थिति लॉक करने में विफल, एसपीयू एएसएमजेआईटी का उपयोग करने से समस्या हल हो सकती है</string>
     <string name="PROGRESS_DIALOG_PRELOADING_SHADER_CACHE">डिस्क से कैश किए गए शेडर्स पूर्वलोड कर रहा है...</string>
 
+	<string name="force_cover_art_search">कवर आर्ट खोज मजबूर करें</string>
 </resources>

@@ -42,7 +42,7 @@
 	<string name="emulator_settings_core_thread_affinity_mask">Маска прив’язки потоків</string>
 	<string name="create_shortcut">Створити ярлик</string>
 	<string name="loading">Завантаження...</string>
-	<string name="resolution_not_support">Роздільна здатність або співвідношення сторін не підтримується\nПоточна гра підтримує лише:\n%s\n\nБудь ласка, змініть налаштування:\n%s\n%s\n</string>
+	<string name="resolution_not_support" formatted="false">Роздільна здатність або співвідношення сторін не підтримується\nПоточна гра підтримує лише:\n%s\n\nБудь ласка, змініть налаштування:\n%s\n%s\n</string>
 	<string name="show_game_info">Показати інформацію про гру</string>
 	<string name="quick_start_page">Швидкий запуск</string>
 	<string name="prev_step">Попередній крок</string>
@@ -1026,4 +1026,5 @@
 	<string name="SAVESTATE_FAILED_DUE_TO_SPU">Збереження стану не вдалося: Не вдалося заблокувати стан SPU, використання SPU ASMJIT виправить це.</string>
 	<string name="PROGRESS_DIALOG_PRELOADING_SHADER_CACHE">Попереднє завантаження кешованих шейдерів з диска...</string>
 
+	<string name="force_cover_art_search">Примусовий пошук обкладинки</string>
 </resources>

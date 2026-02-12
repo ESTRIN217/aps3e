@@ -40,7 +40,7 @@
 	<string name="emulator_settings_core_thread_affinity_mask">執行緒親和性遮罩</string>
 	<string name="create_shortcut">創建捷徑</string>
 	<string name="loading">載入中...</string>
-    <string name="resolution_not_support">解析度或長寬比不受支援\n目前遊戲僅支援:\n%s\n\n請使用以下設定修改:\n%s\n%s\n</string>
+	<string name="resolution_not_support" formatted="false">解析度或長寬比不受支援\n目前遊戲僅支援:\n%s\n\n請使用以下設定修改:\n%s\n%s\n</string>
 	<string name="show_game_info">顯示遊戲資訊</string>
 	<string name="quick_start_page">快速啟動頁面</string>
 	<string name="prev_step">上一步</string>
@@ -1034,4 +1034,5 @@ Translation qwen3
 <string name="PROGRESS_DIALOG_PRELOADING_SHADER_CACHE">從磁碟預先載入著色器快取中...</string>
 
 
+	<string name="force_cover_art_search">強制搜尋封面</string>
 </resources>

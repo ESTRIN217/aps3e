@@ -43,7 +43,7 @@
     <string name="emulator_settings_core_thread_affinity_mask">线程亲和掩码</string>
     <string name="create_shortcut">创建快捷方式</string>
     <string name="loading">载入中...</string>
-    <string name="resolution_not_support">分辨率或宽高比不支持\n当前游戏仅支持:\n%s\n\n请通过以下设置修改:\n%s\n%s\n</string>
+    <string name="resolution_not_support" formatted="false">分辨率或宽高比不支持\n当前游戏仅支持:\n%s\n\n请通过以下设置修改:\n%s\n%s\n</string>
     <string name="show_game_info">显示游戏信息</string>
     <string name="quick_start_page">快速开始页</string>
     <string name="prev_step">上一步</string>
@@ -1039,4 +1039,5 @@
 <string name="PROGRESS_DIALOG_PRELOADING_SHADER_CACHE">从磁盘预加载缓存的着色器...</string>
 
 
+    <string name="force_cover_art_search">强制搜索封面</string>
 </resources>

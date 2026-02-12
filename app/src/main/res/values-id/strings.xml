@@ -42,7 +42,7 @@
 	<string name="emulator_settings_core_thread_affinity_mask">Topeng Afinitas Thread</string>
 	<string name="create_shortcut">Buat Pintasan</string>
 	<string name="loading">Memuat...</string>
-	<string name="resolution_not_support">Resolusi atau rasio aspek tidak didukung\nGame saat ini hanya mendukung:\n%s\n\nSilakan ubah dengan pengaturan berikut:\n%s\n%s\n</string>
+	<string name="resolution_not_support" formatted="false">Resolusi atau rasio aspek tidak didukung\nGame saat ini hanya mendukung:\n%s\n\nSilakan ubah dengan pengaturan berikut:\n%s\n%s\n</string>
 	<string name="show_game_info">Tampilkan Info Game</string>
 	<string name="quick_start_page">Halaman Mulai Cepat</string>
 	<string name="prev_step">Langkah Sebelumnya</string>
@@ -1034,4 +1034,5 @@ Terjemahan qwen3
 <string name="SAVESTATE_FAILED_DUE_TO_SPU">SimpanStatus gagal: Gagal mengunci status SPU, gunakan SPU ASMJIT untuk memperbaiki.</string>
 <string name="PROGRESS_DIALOG_PRELOADING_SHADER_CACHE">Memuat awal cache shader dari disk...</string>
 
+	<string name="force_cover_art_search">Paksa pencarian cover art</string>
 </resources>

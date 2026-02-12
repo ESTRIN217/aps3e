@@ -42,7 +42,7 @@
     <string name="emulator_settings_core_thread_affinity_mask">Maska przypisania wątków</string>
     <string name="create_shortcut">Utwórz skrót</string>
     <string name="loading">Ładowanie...</string>
-    <string name="resolution_not_support">Rozdzielczość lub proporcje ekranu nie są obsługiwane\nAktualna gra obsługuje jedynie:\n%s\n\nZmień ustawienia używając:\n%s\n%s\n</string>
+    <string name="resolution_not_support" formatted="false">Rozdzielczość lub proporcje ekranu nie są obsługiwane\nAktualna gra obsługuje jedynie:\n%s\n\nZmień ustawienia używając:\n%s\n%s\n</string>
     <string name="show_game_info">Pokaż informacje o grze</string>
     <string name="quick_start_page">Strona szybkiego startu</string>
     <string name="prev_step">Poprzedni krok</string>
@@ -1001,4 +1001,5 @@
 	<string name="SAVESTATE_FAILED_DUE_TO_SPU">Błąd savestate: Nie można zablokować stanu SPU, użycie SPU ASMJIT rozwiąże to</string>
 	<string name="PROGRESS_DIALOG_PRELOADING_SHADER_CACHE">Wstępne ładowanie cache shaderów z dysku...</string>
 
+    <string name="force_cover_art_search">Wymus wyszukiwanie okładki</string>
 </resources>

@@ -42,7 +42,7 @@
     <string name="emulator_settings_core_thread_affinity_mask">ماسک تعلق نخ</string>
     <string name="create_shortcut">ایجاد میانبر</string>
     <string name="loading">در حال بارگذاری...</string>
-    <string name="resolution_not_support">وضوح یا نسبت تصویر پشتیبانی نمی‌شود\nاین بازی فقط از موارد زیر پشتیبانی می‌کند:\n%s\n\nلطفاً با تنظیمات زیر آن را تغییر دهید:\n%s\n%s\n</string>
+    <string name="resolution_not_support" formatted="false">وضوح یا نسبت تصویر پشتیبانی نمی‌شود\nاین بازی فقط از موارد زیر پشتیبانی می‌کند:\n%s\n\nلطفاً با تنظیمات زیر آن را تغییر دهید:\n%s\n%s\n</string>
     <string name="show_game_info">نمایش اطلاعات بازی</string>
     <string name="quick_start_page">صفحه شروع سریع</string>
     <string name="prev_step">قدم قبلی</string>
@@ -1032,4 +1032,5 @@
 	<string name="SAVESTATE_FAILED_DUE_TO_SPU">ذخیره وضعیت ناموفق بود: قفل SPU ناموفق، استفاده از SPU ASMJIT رفعش می‌کند.</string>
 	<string name="PROGRESS_DIALOG_PRELOADING_SHADER_CACHE">در حال پیش‌بارگیری شیدرها از دیسک...</string>
 
+    <string name="force_cover_art_search">اجبار جستجوی کاور</string>
 </resources>

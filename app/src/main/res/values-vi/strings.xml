@@ -42,7 +42,7 @@
 	<string name="emulator_settings_core_thread_affinity_mask">Mặt nạ ưu tiên luồng</string>
 	<string name="create_shortcut">Tạo Phím tắt</string>
 	<string name="loading">Đang tải...</string>
-	<string name="resolution_not_support">Độ phân giải hoặc tỷ lệ khung hình không được hỗ trợ\nTrò chơi hiện tại chỉ hỗ trợ:\n%s\n\nVui lòng chỉnh sửa bằng các cài đặt sau:\n%s\n%s\n</string>
+	<string name="resolution_not_support" formatted="false">Độ phân giải hoặc tỷ lệ khung hình không được hỗ trợ\nTrò chơi hiện tại chỉ hỗ trợ:\n%s\n\nVui lòng chỉnh sửa bằng các cài đặt sau:\n%s\n%s\n</string>
 	<string name="show_game_info">Hiển thị Thông tin Trò chơi</string>
 	<string name="quick_start_page">Trang Bắt đầu Nhanh</string>
 	<string name="prev_step">Bước Trước</string>
@@ -1034,4 +1034,5 @@ Dịch bởi qwen3
 	<string name="SAVESTATE_FAILED_DUE_TO_SPU">Lưu trạng thái thất bại: Không khóa được trạng thái SPU, dùng SPU ASMJIT sẽ khắc phục</string>
 	<string name="PROGRESS_DIALOG_PRELOADING_SHADER_CACHE">Đang nạp sẵn shader từ đĩa...</string>
 
+	<string name="force_cover_art_search">Buoc tim kiem anh bia</string>
 </resources>

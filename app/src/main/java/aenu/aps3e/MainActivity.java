@@ -73,11 +73,21 @@ import java.io.*;
 import android.view.*;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.compose.ui.platform.ComposeView;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.compose.runtime.Composer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import aenu.aps3e.ui.MainScreenCallbacks;
+import aenu.aps3e.ui.MainScreenKt;
+import aenu.aps3e.ui.LastPlayedInfo;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function2;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -87,6 +97,13 @@ public class MainActivity extends AppCompatActivity {
 	public static final int REQUEST_SELECT_ISO_DIR=6004;
 
 	private static final String PREF_KEY_ISO_DIR="iso_dir";
+	private static final String PREF_LAST_GAME_SERIAL = "last_game_serial";
+	private static final String PREF_LAST_GAME_NAME = "last_game_name";
+	private static final String PREF_LAST_GAME_ISO_URI = "last_game_iso_uri";
+	private static final String PREF_LAST_GAME_DIR = "last_game_dir";
+	private static final String PREF_LAST_GAME_LAUNCH = "last_game_launch_time";
+	private static final String PREF_LAST_SESSION_ACTIVE = "last_session_active";
+	private static final String PREF_LAST_SESSION_START = "last_session_start_time";
 
 	public static File get_hdd0_game_dir(){
 		return new File(Application.get_app_data_dir(),"config/dev_hdd0/game");
@@ -199,6 +216,7 @@ public class MainActivity extends AppCompatActivity {
 				return;
 			}*/
 
+			record_last_game(meta_info, ((GameMetaInfoAdapter) l.getAdapter()).is_disc_game(position));
 			Intent intent = new Intent("aenu.intent.action.APS3E");
 			intent.setPackage(getPackageName());
 			
@@ -206,8 +224,255 @@ public class MainActivity extends AppCompatActivity {
 			startActivity(intent);
 		}
 	};
-	
+
+	private void handle_game_click(int position) {
+		if (!firmware_installed_file().exists()) {
+			Toast.makeText(MainActivity.this, getString(R.string.firmware_not_install), Toast.LENGTH_LONG).show();
+			return;
+		}
+		if (adapter == null) return;
+		Emulator.MetaInfo meta_info = adapter.getMetaInfo(position);
+		if (!meta_info.decrypt) {
+			show_hint_dialog(getString(R.string.undecrypted_game));
+			return;
+		}
+		if (PPUCacheBuildService.isBuilding(meta_info)) {
+			Toast.makeText(MainActivity.this, R.string.creating_ppu_cache, Toast.LENGTH_LONG).show();
+			return;
+		}
+		record_last_game(meta_info, adapter.is_disc_game(position));
+		Intent intent = new Intent("aenu.intent.action.APS3E");
+		intent.setPackage(getPackageName());
+		intent.putExtra(EmulatorActivity.EXTRA_META_INFO, meta_info);
+		startActivity(intent);
+	}
+
+	private void record_last_game(Emulator.MetaInfo meta_info, boolean isDiscGame) {
+		if (meta_info == null) return;
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putString(PREF_LAST_GAME_SERIAL, meta_info.serial);
+		editor.putString(PREF_LAST_GAME_NAME, meta_info.name);
+		editor.putLong(PREF_LAST_GAME_LAUNCH, System.currentTimeMillis());
+		editor.putBoolean(PREF_LAST_SESSION_ACTIVE, true);
+		editor.putLong(PREF_LAST_SESSION_START, System.currentTimeMillis());
+		if (meta_info.iso_uri != null) {
+			editor.putString(PREF_LAST_GAME_ISO_URI, meta_info.iso_uri);
+		} else {
+			editor.remove(PREF_LAST_GAME_ISO_URI);
+		}
+		if (!isDiscGame && meta_info.serial != null) {
+			File gameDir = new File(get_hdd0_game_dir(), meta_info.serial);
+			editor.putString(PREF_LAST_GAME_DIR, gameDir.getAbsolutePath());
+		} else {
+			editor.remove(PREF_LAST_GAME_DIR);
+		}
+		editor.apply();
+		last_played_live_data.postValue(load_last_played_info());
+	}
+
+	private LastPlayedInfo load_last_played_info() {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		String serial = prefs.getString(PREF_LAST_GAME_SERIAL, null);
+		String name = prefs.getString(PREF_LAST_GAME_NAME, null);
+		if (serial == null || name == null) return null;
+		String isoUri = prefs.getString(PREF_LAST_GAME_ISO_URI, null);
+		String gameDir = prefs.getString(PREF_LAST_GAME_DIR, null);
+		return new LastPlayedInfo(serial, name, isoUri, gameDir);
+	}
+
+	private void resume_last_game(LastPlayedInfo info) {
+		if (info == null) return;
+		if (!firmware_installed_file().exists()) {
+			Toast.makeText(MainActivity.this, getString(R.string.firmware_not_install), Toast.LENGTH_LONG).show();
+			return;
+		}
+		if (adapter != null) {
+			Emulator.MetaInfo meta_info = adapter.find_meta_info_by_serial(info.getSerial());
+			if (meta_info != null) {
+				if (!meta_info.decrypt) {
+					show_hint_dialog(getString(R.string.undecrypted_game));
+					return;
+				}
+				if (PPUCacheBuildService.isBuilding(meta_info)) {
+					Toast.makeText(MainActivity.this, R.string.creating_ppu_cache, Toast.LENGTH_LONG).show();
+					return;
+				}
+				record_last_game(meta_info, adapter.is_disc_game_by_serial(info.getSerial()));
+				Intent intent = new Intent("aenu.intent.action.APS3E");
+				intent.setPackage(getPackageName());
+				intent.putExtra(EmulatorActivity.EXTRA_META_INFO, meta_info);
+				startActivity(intent);
+				return;
+			}
+		}
+
+		Intent intent = new Intent(this, EmulatorActivity.class);
+		intent.setAction(Intent.ACTION_VIEW);
+		if (info.getIsoUri() != null) {
+			intent.putExtra(EmulatorActivity.EXTRA_ISO_URI, info.getIsoUri());
+		} else if (info.getGameDir() != null) {
+			intent.putExtra(EmulatorActivity.EXTRA_GAME_DIR, info.getGameDir());
+		} else {
+			Toast.makeText(this, R.string.msg_failed, Toast.LENGTH_SHORT).show();
+			return;
+		}
+		startActivity(intent);
+	}
+
+	private boolean handle_game_action(int item_id, int position) {
+		if (adapter == null) return false;
+		if (item_id == R.id.delete_hdd0_install_data) {
+			show_verify_dialog(R.string.delete_hdd0_install_data, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					(progress_task = new ProgressTask(MainActivity.this))
+							.call(new ProgressTask.Task() {
+								@Override
+								public void run(ProgressTask task) {
+									adapter.del_hdd0_install_data(position);
+									task.task_handler.sendEmptyMessage(ProgressTask.TASK_DONE);
+									progress_task = null;
+								}
+							});
+				}
+			});
+			return true;
+		} else if (item_id == R.id.delete_game_data) {
+			show_verify_dialog(R.string.delete_game_data, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					(progress_task = new ProgressTask(MainActivity.this))
+							.call(new ProgressTask.Task() {
+								@Override
+								public void run(ProgressTask task) {
+									adapter.del_game_data(position);
+									task.task_handler.sendEmptyMessage(ProgressTask.TASK_DONE);
+									progress_task = null;
+								}
+							});
+				}
+			});
+			return true;
+		} else if (item_id == R.id.delete_game_and_data) {
+			show_verify_dialog(R.string.delete_game_and_data, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					(progress_task = new ProgressTask(MainActivity.this)
+							.set_done_task(new ProgressTask.UI_Task() {
+								@Override
+								public void run() {
+									refresh_game_list();
+								}
+							}))
+							.call(new ProgressTask.Task() {
+								@Override
+								public void run(ProgressTask task) {
+									adapter.del_hdd0_game_and_data(position);
+									task.task_handler.sendEmptyMessage(ProgressTask.TASK_DONE);
+									progress_task = null;
+								}
+							});
+				}
+			});
+			return true;
+		} else if (item_id == R.id.delete_shaders_cache) {
+			(progress_task = new ProgressTask(MainActivity.this)).call(new ProgressTask.Task() {
+				@Override
+				public void run(ProgressTask task) {
+					adapter.del_shaders_cache(position);
+					task.task_handler.sendEmptyMessage(ProgressTask.TASK_DONE);
+					progress_task = null;
+				}
+			});
+			return true;
+		} else if (item_id == R.id.edit_custom_config) {
+			Intent intent = new Intent(this, EmulatorSettings.class);
+			File cfg_file = Application.get_custom_cfg_file(adapter.getMetaInfo(position).serial);
+			if (!cfg_file.exists()) {
+				copy_file(Application.get_global_config_file(), cfg_file);
+			}
+			intent.putExtra(EmulatorSettings.EXTRA_CONFIG_PATH, cfg_file.getAbsolutePath());
+			startActivity(intent);
+			return true;
+		} else if (item_id == R.id.create_shortcut) {
+			ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
+			Emulator.MetaInfo meta_info = adapter.getMetaInfo(position);
+
+			Bitmap icon = BitmapFactory.decodeByteArray(meta_info.icon, 0, meta_info.icon.length);
+			meta_info.icon = null;
+
+			Intent intent = new Intent(this, EmulatorActivity.class);
+			intent.setAction(Intent.ACTION_VIEW);
+			if (meta_info.iso_uri != null) {
+				intent.putExtra(EmulatorActivity.EXTRA_ISO_URI, meta_info.iso_uri);
+			} else if (!adapter.is_disc_game(position)) {
+				intent.putExtra(EmulatorActivity.EXTRA_GAME_DIR,
+						new File(MainActivity.get_hdd0_game_dir(), meta_info.serial).getAbsolutePath());
+			} else {
+				return false;
+			}
+			shortcutManager.requestPinShortcut(new ShortcutInfo.Builder(this, meta_info.serial)
+					.setShortLabel(meta_info.name)
+					.setIcon(Icon.createWithBitmap(icon))
+					.setIntent(intent)
+					.build(), null);
+			return true;
+		} else if (item_id == R.id.show_game_info) {
+			show_hint_dialog(adapter.getMetaInfo(position).toString());
+			return true;
+		} else if (item_id == R.id.show_trophy_info) {
+			Emulator.MetaInfo meta_info = adapter.getMetaInfo(position);
+			Emulator.GameTrophyInfo trophy_info;
+			if ((trophy_info = Emulator.GameTrophyManager.get_or_init().find(meta_info.name)) != null) {
+				show_trophy_dialog(trophy_info);
+			} else {
+				Toast.makeText(this, R.string.no_found_trophy_info, Toast.LENGTH_SHORT).show();
+			}
+			return true;
+		} else if (item_id == R.id.delete_ppu_cache) {
+			show_verify_dialog(R.string.delete_ppu_cache, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					(progress_task = new ProgressTask(MainActivity.this))
+							.call(new ProgressTask.Task() {
+								@Override
+								public void run(ProgressTask task) {
+									adapter.del_ppu_cache(position);
+									task.task_handler.sendEmptyMessage(ProgressTask.TASK_DONE);
+									progress_task = null;
+								}
+							});
+				}
+			});
+			return true;
+		} else if (item_id == R.id.delete_spu_cache) {
+			show_verify_dialog(R.string.delete_spu_cache, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					(progress_task = new ProgressTask(MainActivity.this))
+							.call(new ProgressTask.Task() {
+								@Override
+								public void run(ProgressTask task) {
+									adapter.del_spu_cache(position);
+									task.task_handler.sendEmptyMessage(ProgressTask.TASK_DONE);
+									progress_task = null;
+								}
+							});
+				}
+			});
+			return true;
+		}
+		return false;
+	}
+
+	public LiveData<List<Emulator.MetaInfo>> getMetaListLiveData() {
+		return meta_list_live_data;
+	}
+
 	GameMetaInfoAdapter adapter;
+	private final MutableLiveData<List<Emulator.MetaInfo>> meta_list_live_data = new MutableLiveData<>(new ArrayList<>());
+	private final MutableLiveData<LastPlayedInfo> last_played_live_data = new MutableLiveData<>(null);
 
 	ProgressTask progress_task;
     @Override
@@ -215,15 +480,107 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
 
-		getSupportActionBar().setTitle(getString(R.string.select_game));//"选择游戏");
+		androidx.appcompat.app.ActionBar actionBar = getSupportActionBar();
+		if (actionBar != null) {
+			actionBar.setTitle(getString(R.string.select_game));//"ÚÇëµï®µ©©µêÅ");
+		}
 		android.util.Log.i("aps3e_java","main");
 
         setContentView(R.layout.activity_main);
 
-		((ListView)findViewById(R.id.game_list)).setOnItemClickListener(item_click_l);
-		((ListView)findViewById(R.id.game_list)).setEmptyView(findViewById(R.id.game_list_is_empty));
-		//((ListView)findViewById(R.id.game_list)).setOnLongClickListener(item_long_click_l);
-		registerForContextMenu(findViewById(R.id.game_list));
+		last_played_live_data.setValue(load_last_played_info());
+		ComposeView compose_view = findViewById(R.id.compose_view);
+		MainScreenCallbacks callbacks = new MainScreenCallbacks() {
+			@Override
+			public void onInstallFirmware() {
+				request_file_select(MainActivity.this, REQUEST_INSTALL_FIRMWARE);
+			}
+
+			@Override
+			public void onInstallGame() {
+				request_file_select(MainActivity.this, REQUEST_INSTALL_GAME);
+			}
+
+			@Override
+			public void onRefreshList() {
+				refresh_game_list();
+			}
+
+			@Override
+			public void onOpenSettings() {
+				startActivity(new Intent(MainActivity.this, EmulatorSettings.class));
+			}
+
+			@Override
+			public void onOpenAbout() {
+				startActivity(new Intent(MainActivity.this, AboutActivity.class));
+			}
+
+			@Override
+			public void onOpenKeymap() {
+				startActivity(new Intent(MainActivity.this, KeyMapActivity.class));
+			}
+
+			@Override
+			public void onOpenVirtualPadEdit() {
+				startActivity(new Intent(MainActivity.this, VirtualPadEdit.class));
+			}
+
+			@Override
+			public void onOpenFileManager() {
+				UserDataActivity.open_file_manager(MainActivity.this);
+			}
+
+			@Override
+			public void onSetIsoDir() {
+				request_iso_dir_select(MainActivity.this);
+			}
+
+			@Override
+			public void onOpenQuickStart() {
+				Intent it = new Intent(MainActivity.this, QuickStartActivity.class);
+				it.setAction(QuickStartActivity.ACTION_REENTRY);
+				startActivity(it);
+			}
+
+			@Override
+			public void onBuyPremium() {
+				try {
+					startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=aenu.aps3e.premium")));
+				} catch (Exception e) {
+					startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=aenu.aps3e.premium")));
+				}
+			}
+
+			@Override
+			public void onGameClick(int position) {
+				handle_game_click(position);
+			}
+
+			@Override
+			public void onGameAction(int actionId, int position) {
+				handle_game_action(actionId, position);
+			}
+
+			@Override
+			public boolean isDiscGame(int position) {
+				if (adapter == null) return false;
+				return adapter.is_disc_game(position);
+			}
+
+			@Override
+			public void onResumeLastGame(LastPlayedInfo info) {
+				resume_last_game(info);
+			}
+		};
+
+		compose_view.setContent(new Function2<Composer, Integer, Unit>() {
+			@Override
+			public Unit invoke(Composer composer, Integer changed) {
+				MainScreenKt.Aps3eMainScreen(meta_list_live_data, last_played_live_data, callbacks, composer, 0);
+				return Unit.INSTANCE;
+			}
+		});
 
 		/*boolean is_request_perms_ok;
 		if(Build.VERSION.SDK_INT>=30) {
@@ -498,6 +855,12 @@ public class MainActivity extends AppCompatActivity {
 						refresh_game_list();*/
 						(progress_task=new  ProgressTask(this)
 								.set_progress_message(getString(R.string.installing_game))
+								.set_done_task(new ProgressTask.UI_Task() {
+									@Override
+									public void run() {
+										refresh_game_list();
+									}
+								})
 								.set_failed_task(new ProgressTask.UI_Task() {
 									@Override
 									public void run() {
@@ -519,11 +882,15 @@ public class MainActivity extends AppCompatActivity {
 					} else if (fileName.endsWith(".rap")) {
 						if(!Emulator.get.install_rap(pfd, fileName)){
 							Toast.makeText(this, "Failed to install RAP", Toast.LENGTH_SHORT).show();
+						} else {
+							refresh_game_list();
 						}
 					}
 					else if (fileName.endsWith(".edat")) {
 						if(!Emulator.get.install_edat(pfd)){
 							Toast.makeText(this, "Failed to install EDAT", Toast.LENGTH_SHORT).show();
+						} else {
+							refresh_game_list();
 						}
 					}
 					break;
@@ -555,162 +922,9 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-		
 		int position = info.position;
 		int item_id = item.getItemId();
-		if(item_id==R.id.delete_hdd0_install_data){
-			show_verify_dialog(R.string.delete_hdd0_install_data, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					(progress_task=new ProgressTask(MainActivity.this)).call(new ProgressTask.Task() {
-						@Override
-						public void run(ProgressTask task) {
-							adapter.del_hdd0_install_data(position);
-							task.task_handler.sendEmptyMessage(ProgressTask.TASK_DONE);
-							progress_task=null;
-						}
-					});
-				}
-			});
-			return true;
-		}
-		else if(item_id==R.id.delete_game_data){
-			show_verify_dialog(R.string.delete_game_data, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					(progress_task=new ProgressTask(MainActivity.this)).call(new ProgressTask.Task() {
-						@Override
-						public void run(ProgressTask task) {
-							adapter.del_game_data(position);
-							task.task_handler.sendEmptyMessage(ProgressTask.TASK_DONE);
-							progress_task=null;
-						}
-					});
-				}
-			});
-		}
-		else if(item_id==R.id.delete_game_and_data){
-			show_verify_dialog(R.string.delete_game_and_data, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					(progress_task=new ProgressTask(MainActivity.this)
-							.set_done_task(new ProgressTask.UI_Task(){
-								@Override
-								public void run() {
-									refresh_game_list();
-								}
-							}))
-							.call(new ProgressTask.Task() {
-						@Override
-						public void run(ProgressTask task) {
-							adapter.del_hdd0_game_and_data(position);
-							task.task_handler.sendEmptyMessage(ProgressTask.TASK_DONE);
-							progress_task=null;
-						}
-					});
-				}
-			});
-		}
-		else if(item_id==R.id.delete_shaders_cache){
-			(progress_task=new ProgressTask(MainActivity.this)).call(new ProgressTask.Task() {
-				@Override
-				public void run(ProgressTask task) {
-					adapter.del_shaders_cache(position);
-					task.task_handler.sendEmptyMessage(ProgressTask.TASK_DONE);
-					progress_task=null;
-				}
-			});
-		}
-		else if(item_id==R.id.edit_custom_config){
-			Intent intent=new Intent(this,EmulatorSettings.class);
-			File cfg_file=Application.get_custom_cfg_file(adapter.getMetaInfo(position).serial);
-			if(!cfg_file.exists()){
-				copy_file(Application.get_global_config_file(),cfg_file);
-			}
-			intent.putExtra(EmulatorSettings.EXTRA_CONFIG_PATH, cfg_file.getAbsolutePath());
-			startActivity(intent);
-		}
-		else if(item_id==R.id.create_shortcut){
-			ShortcutManager shortcutManager=getSystemService(ShortcutManager.class);
-			Emulator.MetaInfo meta_info=adapter.getMetaInfo(position);
-
-			Bitmap icon=BitmapFactory.decodeByteArray(meta_info.icon,0,meta_info.icon.length);
-			meta_info.icon=null;
-
-			Intent intent=new Intent(this,EmulatorActivity.class);
-			{
-				intent.setAction(Intent.ACTION_VIEW);
-				if(meta_info.iso_uri!=null) {
-					intent.putExtra(EmulatorActivity.EXTRA_ISO_URI, meta_info.iso_uri);
-				}
-				else if(!adapter.is_disc_game(position)){
-					intent.putExtra(EmulatorActivity.EXTRA_GAME_DIR
-							,new File(MainActivity.get_hdd0_game_dir(),meta_info.serial).getAbsolutePath());
-				}
-				else{
-					return false;
-				}
-			}
-			shortcutManager.requestPinShortcut(new ShortcutInfo.Builder(this, meta_info.serial)
-					.setShortLabel(meta_info.name)
-					.setIcon(Icon.createWithBitmap( icon))
-					.setIntent(intent)
-					.build(), null);
-		}
-		else if(item_id==R.id.show_game_info){
-			show_hint_dialog(adapter.getMetaInfo(position).toString());
-		}
-		else if(item_id==R.id.show_trophy_info){
-			Emulator.MetaInfo meta_info=adapter.getMetaInfo(position);
-			Emulator.GameTrophyInfo trophy_info;
-			if((trophy_info=Emulator.GameTrophyManager.get_or_init().find(meta_info.name))!=null)
-				show_trophy_dialog(trophy_info);
-			else
-				Toast.makeText(this, R.string.no_found_trophy_info, Toast.LENGTH_SHORT).show();
-		}
-		/*else if(item_id==R.id.create_ppu_cache){
-			Emulator.MetaInfo meta_info=adapter.getMetaInfo(position);
-			Intent intent=new Intent(this,PPUCacheBuildService.class);
-			intent.putExtra(PPUCacheBuildService.EXTRA_META_INFO, meta_info);
-
-			if(!PPUCacheBuildService.isBuilding(meta_info)){
-				startService(intent);
-			}
-		}*/
-		else if(item_id==R.id.delete_ppu_cache){
-			show_verify_dialog(R.string.delete_ppu_cache, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					(progress_task=new ProgressTask(MainActivity.this)
-							)
-							.call(new ProgressTask.Task() {
-								@Override
-								public void run(ProgressTask task) {
-									adapter.del_ppu_cache(position);
-									task.task_handler.sendEmptyMessage(ProgressTask.TASK_DONE);
-									progress_task=null;
-								}
-							});
-				}
-			});
-		}
-		else if(item_id==R.id.delete_spu_cache){
-			show_verify_dialog(R.string.delete_spu_cache, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					(progress_task=new ProgressTask(MainActivity.this)
-					)
-							.call(new ProgressTask.Task() {
-								@Override
-								public void run(ProgressTask task) {
-									adapter.del_spu_cache(position);
-									task.task_handler.sendEmptyMessage(ProgressTask.TASK_DONE);
-									progress_task=null;
-								}
-							});
-				}
-			});
-		}
+		if (handle_game_action(item_id, position)) return true;
 		return super.onContextItemSelected(item);
 	}
 
@@ -880,12 +1094,17 @@ public class MainActivity extends AppCompatActivity {
         try {
             ArrayList<Emulator.MetaInfo> metas=GameMetaInfoAdapter.load_game_list_from_json_file(get_game_list_file());
 			adapter=new GameMetaInfoAdapter(this, metas);
-			((ListView)findViewById(R.id.game_list)).setAdapter(adapter);
+			publish_meta_list();
         } catch (Exception e) {
 			Log.w("show_game_list",e.getMessage());
 			refresh_game_list();
         }
 
+	}
+
+	private void publish_meta_list() {
+		if(adapter==null) return;
+		meta_list_live_data.postValue(new ArrayList<>(adapter.metas));
 	}
 
     private static class GameMetaInfoAdapter extends BaseAdapter {
@@ -1068,6 +1287,14 @@ public class MainActivity extends AppCompatActivity {
             return metas.get(pos);
         }
 
+		public Emulator.MetaInfo find_meta_info_by_serial(String serial) {
+			if (serial == null) return null;
+			for (Emulator.MetaInfo info : metas) {
+				if (serial.equals(info.serial)) return info;
+			}
+			return null;
+		}
+
 		public boolean is_disc_game(int pos){
 			Emulator.MetaInfo info=metas.get(pos);
 			if(info.iso_uri!=null)
@@ -1075,6 +1302,13 @@ public class MainActivity extends AppCompatActivity {
 			if(info.eboot_path.startsWith(get_disc_game_dir().getAbsolutePath()))
 				return true;
 			return false;
+		}
+
+		public boolean is_disc_game_by_serial(String serial) {
+			Emulator.MetaInfo info = find_meta_info_by_serial(serial);
+			if (info == null) return false;
+			if (info.iso_uri != null) return true;
+			return info.eboot_path.startsWith(get_disc_game_dir().getAbsolutePath());
 		}
 
 		public Emulator.MetaInfo fetch_dlc_update_info(String serial){

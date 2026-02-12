@@ -42,7 +42,7 @@
 	<string name="emulator_settings_core_thread_affinity_mask">İş Parçacığı İlişki Maskesi</string>
 	<string name="create_shortcut">Kısayol Oluştur</string>
 	<string name="loading">Yükleniyor...</string>
-	<string name="resolution_not_support">Çözünürlük veya en-boy oranı desteklenmiyor\nGeçerli oyun yalnızca şunları destekler:\n%s\n\nAyarları şu şekilde değiştirin:\n%s\n%s\n</string>
+	<string name="resolution_not_support" formatted="false">Çözünürlük veya en-boy oranı desteklenmiyor\nGeçerli oyun yalnızca şunları destekler:\n%s\n\nAyarları şu şekilde değiştirin:\n%s\n%s\n</string>
 	<string name="show_game_info">Oyun Bilgilerini Göster</string>
 	<string name="quick_start_page">Hızlı Başlatma Sayfası</string>
 	<string name="prev_step">Önceki Adım</string>
@@ -1033,4 +1033,5 @@
     <string name="SAVESTATE_FAILED_DUE_TO_MISSING_SPU_SETTING">Oyun kaydı başarısız: SPU durumu kilitlenemedi, SPU Uyumlu modunu etkinleştirmek çözebilir.</string>
     <string name="SAVESTATE_FAILED_DUE_TO_SPU">Oyun kaydı başarısız: SPU durumu kilitlenemedi, SPU ASMJIT kullanmak çözebilir.</string>
     <string name="PROGRESS_DIALOG_PRELOADING_SHADER_CACHE">Diskten önbelleğe alınmış shader’lar yükleniyor...</string>
+	<string name="force_cover_art_search">Kapak aramayi zorla</string>
 </resources>

@@ -33,6 +33,26 @@ public class Emulator extends aenu.emulator.Emulator
 		int resolution=0;
 		int sound_format=0;
 
+		public String getName() {
+			return name;
+		}
+
+		public String getSerial() {
+			return serial;
+		}
+
+		public String getVersion() {
+			return version;
+		}
+
+		public boolean isDecrypt() {
+			return decrypt;
+		}
+
+		public byte[] getIcon() {
+			return icon;
+		}
+
 
 		static JSONObject to_json(MetaInfo  info) throws JSONException {
 			JSONObject jo=new JSONObject();
