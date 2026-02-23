@@ -457,7 +457,10 @@ public class EmulatorActivity extends Activity implements View.OnGenericMotionLi
 
 				vibrator();
 				pressed=true;
-            }
+			} else {
+				Emulator.get.key_event(ControlId.l, false);
+				Emulator.get.key_event(ControlId.r, false);
+			}
             // Check if the AXIS_HAT_Y value is -1 or 1, and set the D-pad
             // UP and DOWN direction accordingly.
             if (Float.compare(yaxis, -1.0f) == 0) {
@@ -473,6 +476,10 @@ public class EmulatorActivity extends Activity implements View.OnGenericMotionLi
 				vibrator();
 				pressed=true;
             }
+			else {
+				Emulator.get.key_event(ControlId.u, false);
+				Emulator.get.key_event(ControlId.d, false);
+			}
         }
 		else if (event instanceof KeyEvent) {
 
