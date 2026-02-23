@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/text_title"
+        android:text="Game Name"
+        android:textAlignment="center"
+        android:gravity="center"
+        android:singleLine="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignBottom="@id/text_serial"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/text_serial"
+        android:text="XXXX99999"
+        android:textAlignment="center"
+        android:layout_alignParentEnd="true"
+        android:typeface="monospace"
+        android:layout_marginEnd="2dp"
+        android:layout_alignParentTop="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_below="@id/text_title"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#458b74"/>
+
+    <ListView
+        android:id="@+id/list_options"
+        android:layout_below="@id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"/>
+
+</RelativeLayout>

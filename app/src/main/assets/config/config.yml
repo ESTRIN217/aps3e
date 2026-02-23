@@ -195,7 +195,7 @@ Audio:
   Audio Channel Layout: Automatic
   Audio Device: "@@@default@@@"
   Master Volume: 100
-  Enable Buffering: true
+  Enable Buffering: false
   Desired Audio Buffer Duration: 100
   Enable Time Stretching: false
   Disable Sampling Skip: false
